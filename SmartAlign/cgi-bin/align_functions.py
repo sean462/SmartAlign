@@ -1,25 +1,42 @@
 
 import string
+import operator
+import math 
+
 
 polarDict = { 'G':'NP', 'A':'NP', 'V':'NP', 'L': 'NP','I':'NP', 'M':'NP', 'W':'NP','F':'NP', 'P':'NP',
 'S':'P', 'T':'P', 'C':'P', 'Y':'P', 'N':'P', 'Q':'P', 
 'K':'PC', 'R':'PC', 'H':'PC',
-'D':'PC', 'E':'PC', '-': '-'
+'D':'NC', 'E':'NC', '-': '-'
 }
-
-
-
-
 
 
 def align(file):
 	seq = readFastaFile(file)
 	seqList = seq.values()
 	polarList = polar_characterize(seqList)
-	polar_SVG = createPolarSVG(polarList)
-	return polar_SVG
+	sorted_list = index_list(polarList)
+	
+	sorted_SVG = createSortedSVG(sorted_list, polarDict)
+	#create list of index_lists
 
+	#polar_SVG = createPolarSVG(polarList)
+	return sorted_SVG
 
+def index_list(input):
+	num_seqs = len(input)
+	len_seq = len(input[0])
+	i_list = []
+	for i in xrange(len_seq):
+		i_elt = {}
+		for y in xrange(num_seqs):
+			if input[y][i] in i_elt:
+				i_elt[ input[y][i] ] += 1
+			else:
+				i_elt[ input[y][i]] = 1 
+		sorted_elt = sorted(i_elt.iteritems(), key=operator.itemgetter(1))
+		i_list.append(sorted_elt)
+	return i_list
 
 def readFasta(file):
 
@@ -76,9 +93,9 @@ def createPolarSVG(polar_list):
     Output: the code for the SVG image.'''
 
     #height of query and frames
-    box_len = 20
+    box_len = 5
 
-    canvas_height = len(polar_list)*box_len + 100
+    canvas_height = len(polar_list)*box_len + 4000
     canvas_width = len(polar_list[0])*box_len + 50
  
 
@@ -119,3 +136,73 @@ def createPolarSVG(polar_list):
 
     figureSVG += '</svg>'
     return figureSVG
+
+def createSortedSVG(input, char_dict):
+
+	#height of query and frames
+	box_len = 15
+	box_height = 100
+
+	canvas_height = len(input[0])*box_len + 400
+	canvas_width = len(input)*box_len + 100
+ 
+
+    #start SVG string and draw the query rectangle with start and end coordinates
+	figureSVG = '''
+<svg height="{height}" width="{width}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'''.format(height = canvas_height, width = canvas_width)
+	x_pos = 0
+	y_pos = canvas_height 
+	seq_SVG = ''
+	for index in input: 
+		#print 'index:', index
+		for character in index:
+			if character[0] == 'NP':
+				seq_SVG = seq_SVG + """<rect fill = "blue" height = "{height}" width = "{box_len}" x ="{xcoord}" y ="{ycoord}" stroke = "black" />""".format(xcoord = (20 + x_pos*box_len), ycoord = (y_pos - box_height*find_height(char_dict, index, character)), box_len = box_len, height = box_height*find_height(char_dict, index, character))
+				y_pos = y_pos - box_height*find_height(char_dict, index, character)
+			elif character[0] == 'P':
+				seq_SVG = seq_SVG + """<rect fill = "red" height = "{height}" width = "{box_len}" x ="{xcoord}" y ="{ycoord}" stroke = "black" />""".format(xcoord = (20 + x_pos*box_len), ycoord = (y_pos - box_height*find_height(char_dict, index, character)), box_len = box_len, height = box_height*find_height(char_dict, index, character))
+				y_pos = y_pos - box_height*find_height(char_dict, index, character)
+			elif character[0] == 'PC':
+				seq_SVG = seq_SVG + """<rect fill = "orange" height = "{height}" width = "{box_len}" x ="{xcoord}" y ="{ycoord}" stroke = "black" />""".format(xcoord = (20 + x_pos*box_len), ycoord = (y_pos - box_height*find_height(char_dict, index, character)), box_len = box_len, height = box_height*find_height(char_dict, index, character))
+				y_pos = y_pos - box_height*find_height(char_dict, index, character)
+			elif character[0] == 'NC':
+				seq_SVG = seq_SVG + """<rect fill = "green" height = "{height}" width = "{box_len}" x ="{xcoord}" y ="{ycoord}" stroke = "black" />""".format(xcoord = (20 + x_pos*box_len), ycoord = (y_pos - box_height*find_height(char_dict, index, character)), box_len = box_len, height = box_height*find_height(char_dict, index, character))
+				y_pos = y_pos - box_height*find_height(char_dict, index, character)
+			#elif character[0] == '-':
+				#seq_SVG = seq_SVG + """<rect fill = "black" height = "{height}" width = "{box_len}" x ="{xcoord}" y ="{ycoord}" stroke = "black" />""".format(xcoord = (20 + x_pos*box_len), ycoord = (y_pos - box_height*find_height(char_dict, index, character)), box_len = box_len, height = box_height*find_height(char_dict, index, character))
+				#y_pos = y_pos - box_height*find_height(char_dict, index, character)
+		y_pos = canvas_height
+		x_pos += 1
+	
+	figureSVG = figureSVG + seq_SVG
+	# text_SVG = ''
+
+	# for i in xrange(len(polar_list[0])):
+	# 	if i % 10 == 0:
+	# 		text_SVG = text_SVG + """<text x ="{text_X}" y ="{y_pos}" font-family = "Serif" font-size = "8" fill = "black"> {num} </text>""".format(text_X = (20 + i*box_len + box_len/(4.0)), y_pos = (30 + (y_pos + 1)*box_len), num = i )
+
+	# figureSVG = figureSVG + text_SVG
+
+	figureSVG += '</svg>'
+	return figureSVG
+
+def find_height(char_dict, index, character):
+	max_height =math.log( 4, 2)
+	num_seq = 0
+	#print index
+	for symbol in index:
+		num_seq += symbol[1]
+
+	#symbol_lst = ['NP', 'P', 'PC', 'NC']
+	#rel_freqs = []
+	#for symbol in symbol_lst
+
+	#print '<--- This seq has ', num_seq, ' sequences'
+	#print float((max_height - float(character[1])/float(num_seq) * (-1) *float(math.log(float(character[1])/float(num_seq), 2)))) / float(max_height)
+	#print 'height: ', (max_height - float(character[1])/float(num_seq) *float(math.log(float(character[1])/float(num_seq), 2)))
+	rel_freq = float(character[1])/float(num_seq)
+	entro = rel_freq*math.log(rel_freq, 2.0)
+	R = rel_freq*(2 + entro)
+	return R
+
+	#return max_height - float(character[1])/float(num_seq) * (-1) *float(math.log(float(character[1])/float(num_seq), 2))

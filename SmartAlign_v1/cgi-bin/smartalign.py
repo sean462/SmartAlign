@@ -38,7 +38,7 @@ print '''
            <center>
            	<h2> Side Chain Charge Characterization </h2>
            	Red = Polar | Blue = Non-Polar  | Orange = Positively Charged | Green = Negatively Charged 
-			<div style="width:80%;height:500px;line-height:3em;overflow: auto; padding:5px; background-color:#FFFFFF;border:20px double #EE82EE">
+			<div style="width:80%;height:150px;line-height:3em;overflow: auto; padding:5px; background-color:#FFFFFF;border:20px double #EE82EE">
 					{figure} 
 			</div>
 

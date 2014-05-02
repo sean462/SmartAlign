@@ -7,7 +7,11 @@
 	{
 		margin: 0px;
 		padding: 0px;
-		background: #16A085;
+        background-image:url('images/scr05.jpg');
+        background-size:cover;
+        background-repeat:no-repeat;
+
+    /* background: #3e9dfd; */
 		font-family: 'Questrial', sans-serif;
 		font-size: 12pt;
 		color: rgba(0,0,0,.6);
@@ -18,7 +22,7 @@
 	{
 		margin: 0;
 		padding: 0;
-		color: #404040;
+		color: #000000;
 	}
 	
 	p, ol, ul
@@ -276,6 +280,7 @@
 		border-radius: 20px;
 		text-align: center;
 		color: #272925;
+        
 	}
 	
 	.button-small

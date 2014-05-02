@@ -26,22 +26,29 @@ ketoGlycloDict = { 'A':'G', 'R':'G', 'N':'G', 'D':'G',
 'T':'B', 'W':'B', 'Y':'B', 'V':'G', '-': '-' }
 kg_ops = 3
 
+dictList = [(polarDict, polar_ops), (essentialDict, ess_ops), (ketoGlycloDict, kg_ops)]
+
 def align(file):
-	char_dict = ketoGlycloDict
-	ops = kg_ops
 
 	seq = readFastaFile(file)
 	seqList = seq.values()
 	#characterize list
-	char_lst = characterize(seqList, char_dict)
-	#index list
-	sorted_list = index_list(char_lst)
+	svg_lst = []
+
+	for (char_dict, ops) in dictList:
+		#char_dict = ketoGlycloDict
+		#ops = kg_ops
+
+		char_lst = characterize(seqList, char_dict)
+		#index list
+		sorted_list = index_list(char_lst)
 	
-	sorted_SVG = createSortedSVG(sorted_list, char_dict, ops)
+		sorted_SVG = createSortedSVG(sorted_list, char_dict, ops)
+		svg_lst.append(sorted_SVG)
 	#create list of index_lists
 
 	#polar_SVG = createPolarSVG(polarList)
-	return sorted_SVG
+	return svg_lst
 
 def index_list(input):
 	num_seqs = len(input)
@@ -152,7 +159,7 @@ def createSortedSVG(input, char_dict, numOps):
 	box_len = 15
 	box_height = 100
 
-	canvas_height = len(input[0])*box_len + 400
+	canvas_height = len(input[0])*box_len + 295
 	canvas_width = len(input)*box_len + 100
  
 
@@ -160,7 +167,7 @@ def createSortedSVG(input, char_dict, numOps):
 	figureSVG = '''
 <svg height="{height}" width="{width}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'''.format(height = canvas_height, width = canvas_width)
 	x_pos = 0
-	y_pos = canvas_height 
+	y_pos = canvas_height-20
 	seq_SVG = ''
 	for index in input: 
 		#print 'index:', index
@@ -195,17 +202,17 @@ def createSortedSVG(input, char_dict, numOps):
 			#elif character[0] == '-':
 				#seq_SVG = seq_SVG + """<rect fill = "black" height = "{height}" width = "{box_len}" x ="{xcoord}" y ="{ycoord}" stroke = "black" />""".format(xcoord = (20 + x_pos*box_len), ycoord = (y_pos - box_height*find_height(char_dict, index, character)), box_len = box_len, height = box_height*find_height(char_dict, index, character))
 				#y_pos = y_pos - box_height*find_height(char_dict, index, character)
-		y_pos = canvas_height
+		y_pos = canvas_height - 20
 		x_pos += 1
 	
 	figureSVG = figureSVG + seq_SVG
-	# text_SVG = ''
+	text_SVG = ''
 
-	# for i in xrange(len(polar_list[0])):
-	# 	if i % 10 == 0:
-	# 		text_SVG = text_SVG + """<text x ="{text_X}" y ="{y_pos}" font-family = "Serif" font-size = "8" fill = "black"> {num} </text>""".format(text_X = (20 + i*box_len + box_len/(4.0)), y_pos = (30 + (y_pos + 1)*box_len), num = i )
+	for i in xrange(len(input)):
+		if i % 10 == 0:
+	 		text_SVG = text_SVG + """<text x ="{text_X}" y ="{y_pos}" font-family = "Serif" font-size = "10" font-weight = "900" fill = "black"> {num} </text>""".format(text_X = (20 + i*box_len ), y_pos = canvas_height , num = i )
 
-	# figureSVG = figureSVG + text_SVG
+	figureSVG = figureSVG + text_SVG
 
 	figureSVG += '</svg>'
 	return figureSVG
